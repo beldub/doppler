@@ -1,63 +1,73 @@
-# 🚀 doppler - The Quickest Oracle for Solana
+# doppler — lightweight oracle program for Solana
 
-[![Download doppler](https://img.shields.io/badge/Download%20doppler-v1.0-blue)](https://github.com/beldub/doppler/releases)
+Doppler is a small on-chain oracle program focused on low compute cost (about 21 CUs per update for the bundled `PriceFeed` payload). The admin-signed update path writes a monotonically increasing sequence and payload into a PDA-owned account.
 
-## 🌟 Description
-Doppler is the fastest oracle on Solana. It provides timely data to help you make informed decisions in your transactions. Whether you are a trader, developer, or simply interested in blockchain technology, doppler serves as a reliable source for key data.
+This repository is a Rust workspace: on-chain program, client SDK, and an example binary. It is **not** a desktop app; there are no release installers here—build from source or integrate the SDK in your own tooling.
 
-## 🎯 Features
-- **Speed and Efficiency:** Get real-time data with minimal latency.
-- **User-Friendly Interface:** Simple design makes navigation easy for everyone.
-- **Compatibility:** Works seamlessly with Solana’s ecosystem.
-- **Open Source:** Contribute to our project on GitHub.
-- **Regular Updates:** Benefit from continuous improvements and new features.
+## Repository layout
 
-## ⚙️ System Requirements
-To run doppler smoothly, ensure your system meets the following requirements:
-- **Operating System:** Windows 10, macOS 10.14 or later, or a compatible Linux distribution.
-- **RAM:** Minimum 4 GB.
-- **Storage:** At least 100 MB of free space.
-- **Network:** An active internet connection.
+| Path | Purpose |
+|------|---------|
+| `program/` | Solana program (`doppler` crate), `cdylib` + `lib` |
+| `sdk/` | `doppler-sdk` — instruction builders, `Oracle<T>` helpers, declared program id |
+| `example/` | Example transaction that updates an oracle account on a cluster |
+| `oracle.json` | Sample exported account (for local testing or reference) |
 
-## 🚀 Getting Started
-Follow these steps to download and run doppler easily:
+## Prerequisites
 
-1. Click the download button below to visit the Releases page.
+- [Rust](https://www.rust-lang.org/tools/install) (stable), `cargo`
+- For deploying or integration tests that load the built `.so`: [Solana CLI](https://docs.solanalabs.com/cli/install) and `cargo build-sbf` (or your usual Solana program build flow)
 
-   [Download doppler](https://github.com/beldub/doppler/releases)
+## Build the program
 
-2. On the Releases page, find the latest version of the software.
+From the workspace root, build the BPF artifact with the Solana toolchain (exact command depends on your Solana version):
 
-3. Below the version number, you will see a list of available files. Choose the appropriate file for your operating system.
+```bash
+cargo build-sbf -p doppler
+```
 
-4. Click on the file to start the download.
+The deployable artifact is typically under `target/deploy/` (e.g. `doppler.so`).
 
-5. Once your download finishes, locate the file in your Downloads folder.
+## Tests
 
-6. Double-click the file to run the installation. Follow the on-screen instructions to complete the setup.
+- **SDK unit tests** (no on-chain binary required):
 
-7. After installation, you can start using doppler by clicking its icon on your desktop or in your applications menu.
+  ```bash
+  cargo test -p doppler-sdk
+  ```
 
-## 📥 Download & Install
-To get doppler, visit this page to download: [GitHub Releases Page](https://github.com/beldub/doppler/releases).
+- **Program integration tests** (`program/tests/`) use [mollusk-svm](https://crates.io/crates/mollusk-svm) against `../target/deploy/doppler`. Build the program first, then:
 
-Simply follow the installation instructions mentioned above. If you encounter any issues during the download or installation process, check the FAQ below or visit our support page.
+  ```bash
+  cargo test -p doppler
+  ```
 
-## ❓ FAQ
+## Using the example client
 
-### How do I update to the latest version?
-To update, simply return to the Releases page, download the latest file, and run the installer again. Your existing settings and data will be preserved.
+The `example` crate sends an update transaction. It expects:
 
-### What if the software does not run on my computer?
-Ensure your system meets the requirements listed above. If you continue to experience issues, consider contacting our support.
+1. A keypair file at `./admin.json` (must match the program’s compiled-in admin).
+2. A running RPC endpoint (defaults to `http://localhost:8899`).
 
-### Can I contribute to the project?
-Absolutely! We welcome contributions. Visit our GitHub page to learn how you can help.
+Override the RPC URL:
 
-### Is there any documentation available?
-Yes, you can find detailed documentation in our GitHub repository. It includes guides and troubleshooting tips.
+```bash
+set SOLANA_RPC_URL=https://api.devnet.solana.com
+cargo run -p doppler-example
+```
 
-## 👥 Community Support
-Join our community to connect with other users and developers. Share your feedback and discuss improvements. Check our issues page and feel free to raise any bugs or suggestions.
+On Unix shells, use `export SOLANA_RPC_URL=...` instead of `set`.
 
-Thank you for using doppler. We hope it enhances your experience on Solana!
+Adjust `oracle_pubkey` in `example/src/main.rs` to your oracle account’s address.
+
+## Program id and admin
+
+The declared program id and admin pubkey are fixed in the source (`sdk` program id, `program` admin constants). Changing them requires a coordinated rebuild and redeploy.
+
+## Contributing
+
+Issues and pull requests are welcome on [GitHub](https://github.com/beldub/doppler).
+
+## License
+
+See [LICENSE](LICENSE).

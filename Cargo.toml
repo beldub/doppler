@@ -4,7 +4,7 @@ members = ["example", "program", "sdk"]
 
 [workspace.package]
 authors = ["Blueshift <@blueshift_gg>"]
-repository = "https://github.com/blueshift-gg/doppler"
+repository = "https://github.com/beldub/doppler"
 readme = "README.md"
 license-file = "LICENSE"
 edition = "2021"

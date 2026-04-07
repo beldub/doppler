@@ -11,9 +11,10 @@ const COMPUTE_BUDGET_IXS_CU_OVERHEAD: u32 = 3 * 150; // 3 compute budget ixs * 1
 const DATA_SIZE_OVERHEAD: u32 = 36 + 22 + 5 + 5 + 9 + 18; // doppler program + compute budget program + load ix + limit ix + price ix
 
 fn main() {
-    // Connect to local Solana cluster
-    let rpc_url = "http://localhost:8899";
-    let client = RpcClient::new(rpc_url.to_string());
+    let rpc_url = std::env::var("SOLANA_RPC_URL").unwrap_or_else(|_| {
+        "http://localhost:8899".to_string()
+    });
+    let client = RpcClient::new(rpc_url);
 
     // Load admin keypair (ensure this path is correct)
     let admin = Keypair::read_from_file("./admin.json").expect("Failed to read keypair");
