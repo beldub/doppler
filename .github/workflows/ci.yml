@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  check-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: cargo test (doppler-sdk)
+        run: cargo test -p doppler-sdk
+
+      - name: cargo check (program)
+        run: cargo check -p doppler
+
+      - name: cargo check (example)
+        run: cargo check -p doppler-example
